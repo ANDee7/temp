@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE install PUBLIC "-//Joomla! 1.6//DTD template 1.0//EN" "http://www.joomla.org/xml/dtd/1.6/template-install.dtd">
+<extension version="1.6" type="template" client="site">
+	<name>All-OU</name>
+	<version>1</version>
+	<creationDate>28_01_2015</creationDate>
+	<author>ANDee</author>
+	<authorEmail>support@tsn.lokos.net</authorEmail>
+	<description>All-OU</description>
+
+	<files>
+		<folder>css</folder>
+		<folder>img</folder>
+		<filename>index.html</filename>
+		<filename>index.php</filename>
+		<filename>templateDetails.xml</filename>
+	</files>
+
+	<positions>
+			<position>other-templ</position>
+			<position>logo-top-name</position>
+			<position>logo-bottom-name</position>
+			<position>map-link</position>
+			<position>number</position>
+			<position>kontakt-link</position>
+			<position>text-welcom</position>
+			<position>text-welcom-link</position>
+			<position>menu</position>
+			<position>news-1</position>
+			<position>news-2-link</position>
+			<position>help-link</position>
+			<position>kontakt</position>
+			<position>footer-right</position>
+			<position>content</position>
+			<position>center</position>
+			<position>date</position>
+			<position>footer-left</position>
+			<position>footer-right</position>			
+	</positions>
+		
+</extension>

@@ -1,11 +1,13 @@
-import { mockBusinesses, mockServices } from "../../db/in-memory-store.js";
+import type { CatalogRepository } from "../../db/repositories.js";
 
 export class CatalogService {
-  getBusinessBySlug(slug: string) {
-    return mockBusinesses.find((business) => business.slug === slug) ?? null;
+  constructor(private readonly repository: CatalogRepository) {}
+
+  async getBusinessBySlug(slug: string) {
+    return this.repository.getBusinessBySlug(slug);
   }
 
-  listServices(businessId: string) {
-    return mockServices.filter((service) => service.businessId === businessId && service.isActive);
+  async listServices(businessId: string) {
+    return this.repository.listServices(businessId);
   }
 }

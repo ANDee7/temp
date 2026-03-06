@@ -1,7 +1,9 @@
-import { mockStaff } from "../../db/in-memory-store.js";
+import type { StaffRepository } from "../../db/repositories.js";
 
 export class StaffService {
-  listByBusiness(businessId: string) {
-    return mockStaff.filter((staff) => staff.businessId === businessId);
+  constructor(private readonly repository: StaffRepository) {}
+
+  async listByBusiness(businessId: string) {
+    return this.repository.listByBusiness(businessId);
   }
 }

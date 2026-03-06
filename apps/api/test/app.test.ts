@@ -6,7 +6,8 @@ const testEnv = {
   API_PORT: 4001,
   API_HOST: "127.0.0.1",
   JWT_SECRET: "test-secret-123",
-  FRONTEND_URL: "http://localhost:3000"
+  FRONTEND_URL: "http://localhost:3000",
+  DATA_SOURCE: "in-memory" as const
 };
 
 describe("dikidi-clone-api", () => {

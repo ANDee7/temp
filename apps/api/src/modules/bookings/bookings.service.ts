@@ -1,18 +1,15 @@
 import type { Booking, CreateBookingInput } from "@dikidi-clone/shared";
-import { BookingSchema } from "@dikidi-clone/shared";
-import { v4 as uuidv4 } from "uuid";
-import { mockBookings, mockServices } from "../../db/in-memory-store.js";
+import type { BookingsRepository } from "../../db/repositories.js";
 import { ClientsService } from "../clients/clients.service.js";
 
-const clientsService = new ClientsService();
-
-function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
-  return aStart < bEnd && bStart < aEnd;
-}
-
 export class BookingsService {
-  createBooking(input: CreateBookingInput): Booking {
-    const service = mockServices.find((entry) => entry.id === input.serviceId);
+  constructor(
+    private readonly repository: BookingsRepository,
+    private readonly clientsService: ClientsService
+  ) {}
+
+  async createBooking(input: CreateBookingInput): Promise<Booking> {
+    const service = await this.repository.getServiceById(input.serviceId);
     if (!service) {
       throw new Error("Service not found");
     }
@@ -20,39 +17,30 @@ export class BookingsService {
     const startAt = new Date(input.startAt);
     const endAt = new Date(startAt.getTime() + service.durationMin * 60000);
 
-    const hasCollision = mockBookings.some((booking) => {
-      if (booking.staffId !== input.staffId) {
-        return false;
-      }
-      if (booking.status === "cancelled") {
-        return false;
-      }
-      return overlaps(startAt, endAt, new Date(booking.startAt), new Date(booking.endAt));
+    const hasCollision = await this.repository.hasCollision({
+      staffId: input.staffId,
+      startAt,
+      endAt
     });
 
     if (hasCollision) {
       throw new Error("Time slot is already booked for selected specialist");
     }
 
-    const client = clientsService.upsert(input.client);
+    const client = await this.clientsService.upsert(input.client);
 
-    const created: Booking = BookingSchema.parse({
-      id: uuidv4(),
+    return this.repository.create({
       businessId: input.businessId,
       serviceId: input.serviceId,
       staffId: input.staffId,
       clientId: client.id,
-      startAt: startAt.toISOString(),
-      endAt: endAt.toISOString(),
-      status: "created",
+      startAt,
+      endAt,
       notes: input.notes
     });
-
-    mockBookings.push(created);
-    return created;
   }
 
-  listByBusiness(businessId: string): Booking[] {
-    return mockBookings.filter((booking) => booking.businessId === businessId);
+  async listByBusiness(businessId: string): Promise<Booking[]> {
+    return this.repository.listByBusiness(businessId);
   }
 }

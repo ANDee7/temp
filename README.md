@@ -12,6 +12,7 @@
   - Мастера (staff)
   - Клиенты
   - Записи (bookings) с проверкой пересечений по времени
+  - Доступность слотов (`availability`) с учетом длительности услуги/таймзоны
   - Data source switch: `DATA_SOURCE=in-memory|prisma`
   - `Prisma Client + seed` для production/dev БД
 - `apps/web` — Next.js web-клиент (App Router)
@@ -75,6 +76,12 @@ npm run lint     # typecheck lint
 npm run test     # тесты по workspaces
 npm run build    # production build
 npm run check    # lint + test + build
+```
+
+### Быстрая проверка availability API
+
+```bash
+curl "http://localhost:4000/api/v1/availability/business/beauty-lab-moscow?serviceId=6c2435be-b9fd-40a6-a719-1734fbd8465c&date=2026-03-10&stepMin=30"
 ```
 
 ---

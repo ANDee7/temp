@@ -27,6 +27,7 @@ export interface ClientsRepository {
 export interface BookingsRepository {
   getServiceById(serviceId: string): Promise<Service | null>;
   hasCollision(input: { staffId: string; startAt: Date; endAt: Date }): Promise<boolean>;
+  listByStaffInRange(input: { staffId: string; startAt: Date; endAt: Date }): Promise<Booking[]>;
   create(input: {
     businessId: string;
     serviceId: string;
@@ -93,6 +94,20 @@ export class InMemoryBookingsRepository implements BookingsRepository {
         return false;
       }
       return input.startAt < new Date(booking.endAt) && new Date(booking.startAt) < input.endAt;
+    });
+  }
+
+  async listByStaffInRange(input: { staffId: string; startAt: Date; endAt: Date }): Promise<Booking[]> {
+    return mockBookings.filter((booking) => {
+      if (booking.staffId !== input.staffId) {
+        return false;
+      }
+      if (booking.status === "cancelled") {
+        return false;
+      }
+      const bookingStart = new Date(booking.startAt);
+      const bookingEnd = new Date(booking.endAt);
+      return bookingStart < input.endAt && input.startAt < bookingEnd;
     });
   }
 
@@ -221,6 +236,26 @@ export class PrismaBookingsRepository implements BookingsRepository {
       }
     });
     return Boolean(booking);
+  }
+
+  async listByStaffInRange(input: { staffId: string; startAt: Date; endAt: Date }): Promise<Booking[]> {
+    const bookings = await this.prismaClient.booking.findMany({
+      where: {
+        staffId: input.staffId,
+        status: { not: "cancelled" },
+        startAt: { lt: input.endAt },
+        endAt: { gt: input.startAt }
+      },
+      orderBy: { startAt: "asc" }
+    });
+
+    return bookings.map((booking) =>
+      BookingSchema.parse({
+        ...booking,
+        startAt: booking.startAt.toISOString(),
+        endAt: booking.endAt.toISOString()
+      })
+    );
   }
 
   async create(input: {

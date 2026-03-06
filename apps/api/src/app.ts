@@ -14,6 +14,8 @@ import {
   PrismaStaffRepository
 } from "./db/repositories.js";
 import { prisma } from "./db/prisma.js";
+import { createAvailabilityRoutes } from "./modules/availability/availability.routes.js";
+import { AvailabilityService } from "./modules/availability/availability.service.js";
 import { createBookingsRoutes } from "./modules/bookings/bookings.routes.js";
 import { BookingsService } from "./modules/bookings/bookings.service.js";
 import { createCatalogRoutes } from "./modules/catalog/catalog.routes.js";
@@ -47,6 +49,11 @@ export function createApp(providedEnv?: AppEnv) {
   const staffService = new StaffService(staffRepository);
   const clientsService = new ClientsService(clientsRepository);
   const bookingsService = new BookingsService(bookingsRepository, clientsService);
+  const availabilityService = new AvailabilityService(
+    catalogService,
+    staffService,
+    bookingsRepository
+  );
 
   app.register(cors, {
     origin: env.FRONTEND_URL
@@ -66,6 +73,7 @@ export function createApp(providedEnv?: AppEnv) {
     v1.register(createStaffRoutes(catalogService, staffService));
     v1.register(createClientsRoutes(clientsService));
     v1.register(createBookingsRoutes(bookingsService));
+    v1.register(createAvailabilityRoutes(availabilityService));
   }, { prefix: "/api/v1" });
 
   if (usePrisma) {

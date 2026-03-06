@@ -58,6 +58,53 @@ export const mockStaff: Staff[] = [
   }
 ];
 
+export type MockStaffWorkingHours = {
+  staffId: string;
+  weekday: number;
+  startMinute: number;
+  endMinute: number;
+};
+
+export type MockStaffScheduleOverride = {
+  staffId: string;
+  date: string;
+  isDayOff: boolean;
+  startMinute?: number;
+  endMinute?: number;
+  note?: string;
+};
+
+export const mockStaffWorkingHours: MockStaffWorkingHours[] = [
+  { staffId: staff1Id, weekday: 1, startMinute: 10 * 60, endMinute: 20 * 60 },
+  { staffId: staff1Id, weekday: 2, startMinute: 10 * 60, endMinute: 20 * 60 },
+  { staffId: staff1Id, weekday: 3, startMinute: 10 * 60, endMinute: 20 * 60 },
+  { staffId: staff1Id, weekday: 4, startMinute: 10 * 60, endMinute: 20 * 60 },
+  { staffId: staff1Id, weekday: 5, startMinute: 10 * 60, endMinute: 20 * 60 },
+  { staffId: staff1Id, weekday: 6, startMinute: 10 * 60, endMinute: 18 * 60 },
+  { staffId: staff2Id, weekday: 1, startMinute: 12 * 60, endMinute: 21 * 60 },
+  { staffId: staff2Id, weekday: 2, startMinute: 12 * 60, endMinute: 21 * 60 },
+  { staffId: staff2Id, weekday: 3, startMinute: 12 * 60, endMinute: 21 * 60 },
+  { staffId: staff2Id, weekday: 4, startMinute: 12 * 60, endMinute: 21 * 60 },
+  { staffId: staff2Id, weekday: 5, startMinute: 12 * 60, endMinute: 21 * 60 }
+];
+
+export const mockStaffScheduleOverrides: MockStaffScheduleOverride[] = [
+  {
+    staffId: staff1Id,
+    date: "2099-12-31",
+    isDayOff: false,
+    startMinute: 14 * 60,
+    endMinute: 18 * 60,
+    note: "Сокращенный график"
+  },
+  {
+    staffId: staff2Id,
+    date: "2099-12-31",
+    isDayOff: true,
+    note: "Отпуск"
+  }
+];
+
 export const mockClients: Client[] = [];
 
 export const mockBookings: Booking[] = [];

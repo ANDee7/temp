@@ -52,13 +52,15 @@ model Service {
 }
 
 model Staff {
-  id         String         @id @default(uuid())
-  businessId String
-  business   Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  fullName   String
-  role       String
-  services   StaffService[]
-  bookings   Booking[]
+  id                String                 @id @default(uuid())
+  businessId        String
+  business          Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  fullName          String
+  role              String
+  services          StaffService[]
+  bookings          Booking[]
+  workingHours      StaffWorkingHours[]
+  scheduleOverrides StaffScheduleOverride[]
 }
 
 model StaffService {
@@ -68,6 +70,30 @@ model StaffService {
   service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@id([staffId, serviceId])
+}
+
+model StaffWorkingHours {
+  id          String @id @default(uuid())
+  staffId     String
+  staff       Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  weekday     Int
+  startMinute Int
+  endMinute   Int
+
+  @@unique([staffId, weekday])
+}
+
+model StaffScheduleOverride {
+  id          String   @id @default(uuid())
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date        DateTime
+  isDayOff    Boolean  @default(false)
+  startMinute Int?
+  endMinute   Int?
+  note        String?
+
+  @@unique([staffId, date])
 }
 
 model Client {

@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { mockBookings, mockClients } from "../src/db/in-memory-store.js";
@@ -56,9 +55,7 @@ describe("dikidi-clone-api", () => {
 
   it("returns availability and excludes booked slots", async () => {
     const app = createApp(testEnv);
-    const date = DateTime.now().setZone("Europe/Moscow").plus({ days: 1 }).toISODate();
-
-    expect(date).toBeTruthy();
+    const date = "2099-12-31";
 
     const availabilityResponse = await app.inject({
       method: "GET",
@@ -96,5 +93,17 @@ describe("dikidi-clone-api", () => {
     const secondPayload = secondAvailabilityResponse.json();
     const nextSlots = secondPayload.availability[0].slots.map((entry: { startAt: string }) => entry.startAt);
     expect(nextSlots).not.toContain(firstSlot);
+  });
+
+  it("respects per-staff day off overrides", async () => {
+    const app = createApp(testEnv);
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/v1/availability/business/beauty-lab-moscow?serviceId=1b89f1f0-92a2-4519-b10e-02ef8ecf0d67&staffId=8062f8db-bc18-47c1-9503-89f9af813f20&date=2099-12-31"
+    });
+
+    expect(response.statusCode).toBe(200);
+    const payload = response.json();
+    expect(payload.availability[0].slots).toHaveLength(0);
   });
 });

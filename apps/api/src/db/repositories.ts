@@ -6,6 +6,8 @@ import {
   mockBookings,
   mockBusinesses,
   mockClients,
+  mockStaffScheduleOverrides,
+  mockStaffWorkingHours,
   mockServices,
   mockStaff
 } from "./in-memory-store.js";
@@ -17,6 +19,15 @@ export interface CatalogRepository {
 
 export interface StaffRepository {
   listByBusiness(businessId: string): Promise<Staff[]>;
+  getWorkingHours(staffId: string, weekday: number): Promise<{
+    startMinute: number;
+    endMinute: number;
+  } | null>;
+  getDateOverride(staffId: string, date: string): Promise<{
+    isDayOff: boolean;
+    startMinute?: number;
+    endMinute?: number;
+  } | null>;
 }
 
 export interface ClientsRepository {
@@ -53,6 +64,38 @@ export class InMemoryCatalogRepository implements CatalogRepository {
 export class InMemoryStaffRepository implements StaffRepository {
   async listByBusiness(businessId: string): Promise<Staff[]> {
     return mockStaff.filter((staff) => staff.businessId === businessId);
+  }
+
+  async getWorkingHours(staffId: string, weekday: number): Promise<{
+    startMinute: number;
+    endMinute: number;
+  } | null> {
+    const workingHours = mockStaffWorkingHours.find(
+      (entry) => entry.staffId === staffId && entry.weekday === weekday
+    );
+    return workingHours
+      ? {
+          startMinute: workingHours.startMinute,
+          endMinute: workingHours.endMinute
+        }
+      : null;
+  }
+
+  async getDateOverride(staffId: string, date: string): Promise<{
+    isDayOff: boolean;
+    startMinute?: number;
+    endMinute?: number;
+  } | null> {
+    const override = mockStaffScheduleOverrides.find(
+      (entry) => entry.staffId === staffId && entry.date === date
+    );
+    return override
+      ? {
+          isDayOff: override.isDayOff,
+          startMinute: override.startMinute,
+          endMinute: override.endMinute
+        }
+      : null;
   }
 }
 
@@ -182,6 +225,50 @@ export class PrismaStaffRepository implements StaffRepository {
         serviceIds: member.services.map((link) => link.serviceId)
       })
     );
+  }
+
+  async getWorkingHours(staffId: string, weekday: number): Promise<{
+    startMinute: number;
+    endMinute: number;
+  } | null> {
+    const workingHours = await this.prismaClient.staffWorkingHours.findUnique({
+      where: {
+        staffId_weekday: {
+          staffId,
+          weekday
+        }
+      }
+    });
+
+    return workingHours
+      ? {
+          startMinute: workingHours.startMinute,
+          endMinute: workingHours.endMinute
+        }
+      : null;
+  }
+
+  async getDateOverride(staffId: string, date: string): Promise<{
+    isDayOff: boolean;
+    startMinute?: number;
+    endMinute?: number;
+  } | null> {
+    const override = await this.prismaClient.staffScheduleOverride.findUnique({
+      where: {
+        staffId_date: {
+          staffId,
+          date: new Date(`${date}T00:00:00.000Z`)
+        }
+      }
+    });
+
+    return override
+      ? {
+          isDayOff: override.isDayOff,
+          startMinute: override.startMinute ?? undefined,
+          endMinute: override.endMinute ?? undefined
+        }
+      : null;
   }
 }
 

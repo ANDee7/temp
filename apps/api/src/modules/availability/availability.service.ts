@@ -4,11 +4,6 @@ import { StaffService } from "../staff/staff.service.js";
 import type { AvailabilityQuery } from "./availability.schemas.js";
 import { DateTime } from "luxon";
 
-type DayWorkingHours = {
-  startHour: number;
-  endHour: number;
-};
-
 type StaffAvailability = {
   staffId: string;
   staffName: string;
@@ -17,16 +12,6 @@ type StaffAvailability = {
     endAt: string;
     startAtLocal: string;
   }>;
-};
-
-const DEFAULT_WORKING_HOURS: Record<number, DayWorkingHours> = {
-  1: { startHour: 10, endHour: 20 },
-  2: { startHour: 10, endHour: 20 },
-  3: { startHour: 10, endHour: 20 },
-  4: { startHour: 10, endHour: 20 },
-  5: { startHour: 10, endHour: 20 },
-  6: { startHour: 10, endHour: 20 },
-  7: { startHour: 10, endHour: 18 }
 };
 
 export class AvailabilityNotFoundError extends Error {
@@ -70,7 +55,6 @@ export class AvailabilityService {
       throw new AvailabilityValidationError("Invalid date or timezone");
     }
 
-    const dayWorkingHours = DEFAULT_WORKING_HOURS[dayStart.weekday];
     const dayEnd = dayStart.plus({ days: 1 });
     const allStaff = await this.staffService.listByBusiness(business.id);
 
@@ -86,18 +70,23 @@ export class AvailabilityService {
     const availability: StaffAvailability[] = [];
 
     for (const member of availableStaff) {
-      const windowStart = dayStart.set({
-        hour: dayWorkingHours.startHour,
-        minute: 0,
-        second: 0,
-        millisecond: 0
-      });
-      const windowEnd = dayStart.set({
-        hour: dayWorkingHours.endHour,
-        minute: 0,
-        second: 0,
-        millisecond: 0
-      });
+      const schedule = await this.staffService.getScheduleForDate(
+        member.id,
+        input.query.date,
+        dayStart.weekday
+      );
+
+      if (!schedule) {
+        availability.push({
+          staffId: member.id,
+          staffName: member.fullName,
+          slots: []
+        });
+        continue;
+      }
+
+      const windowStart = dayStart.plus({ minutes: schedule.startMinute });
+      const windowEnd = dayStart.plus({ minutes: schedule.endMinute });
 
       const bookings = await this.bookingsRepository.listByStaffInRange({
         staffId: member.id,
@@ -123,9 +112,16 @@ export class AvailabilityService {
         });
 
         if (!isPast && !hasCollision) {
+          const slotStartIso = slotStartUtc.toISO();
+          const slotEndIso = slotEndUtc.toISO();
+          if (!slotStartIso || !slotEndIso) {
+            cursor = cursor.plus({ minutes: input.query.stepMin });
+            continue;
+          }
+
           slots.push({
-            startAt: slotStartUtc.toISO(),
-            endAt: slotEndUtc.toISO(),
+            startAt: slotStartIso,
+            endAt: slotEndIso,
             startAtLocal: cursor.toFormat("HH:mm")
           });
         }

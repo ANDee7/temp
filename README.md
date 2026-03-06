@@ -13,6 +13,7 @@
   - Клиенты
   - Записи (bookings) с проверкой пересечений по времени
   - Доступность слотов (`availability`) с учетом длительности услуги/таймзоны
+  - Персональные графики мастеров + исключения по датам (day off / сокращенный день)
   - Data source switch: `DATA_SOURCE=in-memory|prisma`
   - `Prisma Client + seed` для production/dev БД
 - `apps/web` — Next.js web-клиент (App Router)
@@ -83,6 +84,11 @@ npm run check    # lint + test + build
 ```bash
 curl "http://localhost:4000/api/v1/availability/business/beauty-lab-moscow?serviceId=6c2435be-b9fd-40a6-a719-1734fbd8465c&date=2026-03-10&stepMin=30"
 ```
+
+Demo-исключения в seed/in-memory:
+
+- `2099-12-31`: у Анны сокращенный график `14:00-18:00`
+- `2099-12-31`: у Екатерины полный выходной
 
 ---
 

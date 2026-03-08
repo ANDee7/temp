@@ -1,0 +1,23 @@
+{
+  "name": "dikidi-clone-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo starter for online booking service in beauty/wellness domain",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "check": "npm run lint && npm run test && npm run build",
+    "format": "turbo run format"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.5",
+    "typescript": "^5.8.2"
+  },
+  "packageManager": "npm@10.9.3"
+}

@@ -2,26 +2,30 @@ import type { PropsWithChildren } from "react";
 
 type ButtonProps = PropsWithChildren<{
   onClick?: () => void;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "md" | "lg";
   type?: "button" | "submit" | "reset";
+  className?: string;
 }>;
 
-export function Button({ children, onClick, variant = "primary", type = "button" }: ButtonProps) {
-  const baseStyle = {
-    borderRadius: 12,
-    border: "none",
-    padding: "10px 16px",
-    fontWeight: 600,
-    cursor: "pointer"
-  } as const;
+function cn(...values: Array<string | undefined>) {
+  return values.filter(Boolean).join(" ");
+}
 
-  const style =
-    variant === "primary"
-      ? { ...baseStyle, background: "#111827", color: "#ffffff" }
-      : { ...baseStyle, background: "#e5e7eb", color: "#111827" };
-
+export function Button({
+  children,
+  onClick,
+  variant = "primary",
+  size = "md",
+  type = "button",
+  className
+}: ButtonProps) {
   return (
-    <button type={type} onClick={onClick} style={style}>
+    <button
+      type={type}
+      onClick={onClick}
+      className={cn("ui-button", `ui-button--${variant}`, `ui-button--${size}`, className)}
+    >
       {children}
     </button>
   );
@@ -30,23 +34,17 @@ export function Button({ children, onClick, variant = "primary", type = "button"
 type CardProps = PropsWithChildren<{
   title: string;
   subtitle?: string;
+  className?: string;
 }>;
 
-export function Card({ title, subtitle, children }: CardProps) {
+export function Card({ title, subtitle, className, children }: CardProps) {
   return (
-    <section
-      style={{
-        border: "1px solid #e5e7eb",
-        borderRadius: 16,
-        padding: 16,
-        background: "#ffffff"
-      }}
-    >
-      <header style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: 0, fontSize: 18 }}>{title}</h3>
-        {subtitle ? <p style={{ margin: "6px 0 0", color: "#6b7280" }}>{subtitle}</p> : null}
+    <section className={cn("ui-card", className)}>
+      <header className="ui-card__header">
+        <h3 className="ui-card__title">{title}</h3>
+        {subtitle ? <p className="ui-card__subtitle">{subtitle}</p> : null}
       </header>
-      <div>{children}</div>
+      <div className="ui-card__content">{children}</div>
     </section>
   );
 }

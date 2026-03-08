@@ -45,108 +45,132 @@ export function BookingForm({ businessId, services, staff }: BookingFormProps) {
         startAt: new Date(startAt).toISOString(),
         notes: notes || undefined
       });
-      setStatus(`Успешно! ID записи: ${booking.id}`);
+      setStatus(`success: Успешно! ID записи: ${booking.id}`);
+      setFullName("");
+      setPhone("");
+      setEmail("");
+      setNotes("");
     } catch (error) {
-      setStatus(error instanceof Error ? `Ошибка: ${error.message}` : "Неизвестная ошибка");
+      setStatus(
+        error instanceof Error ? `error: Ошибка: ${error.message}` : "error: Неизвестная ошибка"
+      );
     }
   }
 
+  const statusTone = status.startsWith("success")
+    ? "status-chip status-chip--success"
+    : status.startsWith("error")
+      ? "status-chip status-chip--error"
+      : "status-chip status-chip--pending";
+
+  const statusText = status.replace(/^success:\s*|^error:\s*/, "");
+
   return (
-    <Card title="Онлайн-запись" subtitle="Выберите услугу, мастера и удобное время">
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Услуга
-          <select
-            required
-            value={serviceId}
-            onChange={(event) => {
-              const nextServiceId = event.target.value;
-              setServiceId(nextServiceId);
-              const nextStaff = staff.find((member) => member.serviceIds.includes(nextServiceId));
-              if (nextStaff) {
-                setStaffId(nextStaff.id);
-              }
-            }}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          >
-            {services.map((service) => (
-              <option value={service.id} key={service.id}>
-                {service.name} — {service.price} {service.currency} ({service.durationMin} мин)
-              </option>
-            ))}
-          </select>
-        </label>
+    <Card title="Онлайн-запись" subtitle="Выберите услугу, мастера и удобное время" className="stack">
+      <form onSubmit={handleSubmit} className="booking-form">
+        <div className="booking-form__grid">
+          <label className="form-field">
+            <span className="form-label">Услуга</span>
+            <select
+              className="select"
+              required
+              value={serviceId}
+              onChange={(event) => {
+                const nextServiceId = event.target.value;
+                setServiceId(nextServiceId);
+                const nextStaff = staff.find((member) => member.serviceIds.includes(nextServiceId));
+                if (nextStaff) {
+                  setStaffId(nextStaff.id);
+                }
+              }}
+            >
+              {services.map((service) => (
+                <option value={service.id} key={service.id}>
+                  {service.name} — {service.price} {service.currency} ({service.durationMin} мин)
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label>
-          Мастер
-          <select
-            required
-            value={staffId}
-            onChange={(event) => setStaffId(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          >
-            {compatibleStaff.map((member) => (
-              <option value={member.id} key={member.id}>
-                {member.fullName} — {member.role}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className="form-field">
+            <span className="form-label">Мастер</span>
+            <select
+              className="select"
+              required
+              value={staffId}
+              onChange={(event) => setStaffId(event.target.value)}
+            >
+              {compatibleStaff.map((member) => (
+                <option value={member.id} key={member.id}>
+                  {member.fullName} — {member.role}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-        <label>
-          Дата и время
-          <input
-            type="datetime-local"
-            required
-            value={startAt}
-            onChange={(event) => setStartAt(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          />
-        </label>
+        <div className="booking-form__grid">
+          <label className="form-field">
+            <span className="form-label">Дата и время</span>
+            <input
+              className="input"
+              type="datetime-local"
+              required
+              value={startAt}
+              onChange={(event) => setStartAt(event.target.value)}
+            />
+          </label>
 
-        <label>
-          Имя
-          <input
-            required
-            value={fullName}
-            onChange={(event) => setFullName(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          />
-        </label>
+          <label className="form-field">
+            <span className="form-label">Имя</span>
+            <input
+              className="input"
+              required
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+            />
+          </label>
+        </div>
 
-        <label>
-          Телефон
-          <input
-            required
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          />
-        </label>
+        <div className="booking-form__grid">
+          <label className="form-field">
+            <span className="form-label">Телефон</span>
+            <input
+              className="input"
+              required
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+7..."
+            />
+          </label>
 
-        <label>
-          Email (опционально)
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
-          />
-        </label>
+          <label className="form-field">
+            <span className="form-label">Email (опционально)</span>
+            <input
+              className="input"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+        </div>
 
-        <label>
-          Комментарий
+        <label className="form-field form-field--full">
+          <span className="form-label">Комментарий</span>
           <textarea
-            rows={3}
+            className="textarea"
+            rows={4}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
+            placeholder="Комментарий к записи (необязательно)"
           />
         </label>
 
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <Button type="submit">Записаться</Button>
-          <span>{status}</span>
+        <div className="form-footer">
+          <Button type="submit" size="lg">
+            Записаться
+          </Button>
+          {status ? <span className={statusTone}>{statusText}</span> : null}
         </div>
       </form>
     </Card>
